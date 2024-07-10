@@ -1,0 +1,245 @@
+import logging
+import time
+
+import cflib.crtp
+from cflib.crazyflie import Crazyflie
+from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+
+
+from cflib.crazyflie.log import LogConfig
+from cflib.crazyflie.syncLogger import SyncLogger
+
+logging.basicConfig(level=logging.ERROR)
+
+# URI to the Crazyflie to connect to
+uri = 'radio://0/90/2M/E7E7E7E701'
+
+
+
+def Forward(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 1)
+    cf.param.set_value(wheels + '.' + pwm_1, 50)
+    cf.param.set_value(wheels + '.' + pwm_2, 50)
+
+def Backward(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 4)
+    cf.param.set_value(wheels + '.' + pwm_1, 200)
+    cf.param.set_value(wheels + '.' + pwm_2, 200)
+
+def Turnleftcfront(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 1)
+    cf.param.set_value(wheels + '.' + pwm_1, 50)
+    cf.param.set_value(wheels + '.' + pwm_2, 250)
+
+def Turnrigtfront(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 1)
+    cf.param.set_value(wheels + '.' + pwm_1, 250)
+    cf.param.set_value(wheels + '.' + pwm_2, 50)
+
+def Turnleftcback(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 4)
+    cf.param.set_value(wheels + '.' + pwm_1, 50)
+    cf.param.set_value(wheels + '.' + pwm_2, 225)
+
+def Turnrigtback(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 4)
+    cf.param.set_value(wheels + '.' + pwm_1, 225)
+    cf.param.set_value(wheels + '.' + pwm_2, 50)
+
+def Spinleft(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 3)
+    cf.param.set_value(wheels + '.' + pwm_1, 50)
+    cf.param.set_value(wheels + '.' + pwm_2, 225)
+
+def Spinright(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 2)
+    cf.param.set_value(wheels + '.' + pwm_1, 225)
+    cf.param.set_value(wheels + '.' + pwm_2, 50)
+
+def Stop(scf, wheels, state, pwm_1, pwm_2):
+    cf = scf.cf
+    wheels # = group1
+    state # = name1
+    pwm_1 # = name2
+    pwm_2 # = name3
+
+    cf.param.set_value(wheels + '.' + state, 4)
+    cf.param.set_value(wheels + '.' + pwm_1, 0)
+    cf.param.set_value(wheels + '.' + pwm_2, 0)
+
+pX = 0.0
+pY = 0.0
+pZ = 0.0
+pYAW = 0.0
+
+def position_callback(timestamp, data, logconf):
+    x = data['stateEstimate.x']
+    y = data['stateEstimate.y']
+    z = data['stateEstimate.z']
+    yaw = data['stateEstimate.yaw']
+
+    # print('pos: ({}, {}, {})'.format(x, y, z))
+
+    global pX
+    global pY
+    global pZ
+    global pYAW
+    
+    
+    pX = x
+    pY = y
+    pZ = z
+    pYAW = yaw
+
+
+
+def simple_LPS_Rover(scf, logconf):
+        with SyncLogger(scf, lg_stab) as logger:
+
+
+                for log_entry in logger:
+#                    for i in range(1):
+                        timestamp = log_entry[0]
+                        data = log_entry[1]
+                        logconf_name = log_entry[2]
+
+
+                        x = data['stateEstimate.x']
+                        y = data['stateEstimate.y']
+                        z = data['stateEstimate.z']
+                        yaw = data['stateEstimate.yaw']
+
+                        # print('pos: ({}, {}, {})'.format(x, y, z))
+
+                        global pX
+                        global pY
+                        global pZ
+                        global pYAW
+                        
+
+
+#                        print('[%d][%s]: %s' % (timestamp, logconf_name, data))
+                        
+                        pX = x
+                        pY = y
+                        pZ = z
+                        pYAW = yaw
+                        
+#                        print(pX)
+                        
+                        time.sleep(0.1)
+                        
+                        break
+
+def position_rover_control():
+    while 1:
+        
+        simple_LPS_Rover(scf, lg_stab)
+        print(pX)
+                            
+        if pX > 1.7 + 0.05:
+            Backward(scf, 'wheels', 'state', 'pwm_1', 'pwm_2')
+            time.sleep(0.01)
+            
+        elif pX < 1.7 - 0.05:
+            Forward(scf, 'wheels', 'state', 'pwm_1', 'pwm_2')
+            time.sleep(0.01)
+            
+        else:
+            Stop(scf, 'wheels', 'state', 'pwm_1', 'pwm_2')
+            time.sleep(0.01)
+            
+                    
+                    #if pX + 0.1 < dpX :
+                    #    Forward(scf, 'wheels', 'state', 'pwm_1', 'pwm_2')
+                    #    time.sleep(1)
+#            elif x < Xp
+#                Backwardrover
+#            else
+#                if y > Yp
+#                    Turnleftrover
+#                    time.sleep (#para girar 90 graus)
+#                    Fowardrover 
+#                    Turnrightrover
+#                    time.sleep (#voltar com a frente para o eixo x)
+#                elif y < Yp
+#                    Turnleftrover
+#                    time.sleep (#para girar 90 graus)
+#                    Backwardrover
+#                    Turnrightrover
+#                    time.sleep (#voltar com a frente para o eixo x)  
+#                    else
+
+
+if __name__ == '__main__':
+    # Initialize the low-level drivers
+    cflib.crtp.init_drivers()
+
+#    lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
+#    lg_stab.add_variable('stabilizer.roll', 'float')
+#    lg_stab.add_variable('stabilizer.pitch', 'float')
+#    lg_stab.add_variable('stabilizer.yaw', 'float')
+
+    lg_stab = LogConfig(name='stateEstimate', period_in_ms=10)
+    lg_stab.add_variable('stateEstimate.x', 'float')
+    lg_stab.add_variable('stateEstimate.y', 'float')
+    lg_stab.add_variable('stateEstimate.z', 'float')
+    lg_stab.add_variable('stateEstimate.yaw', 'float') #####Com essa informação, posso obter a variação do yal para fazer o giro de eixo do drone.
+
+
+
+    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
+
+#        simple_LPS_Rover(scf, lg_stab)
+#        print(pX)
+
+        position_rover_control()
+        
